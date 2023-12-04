@@ -7,18 +7,46 @@
     "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Blog",
+    "objectID": "posts/Probability/index.html",
+    "href": "posts/Probability/index.html",
+    "title": "Probability Theory and Random Variables",
     "section": "",
-    "text": "Post With Code\n\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\n\n\nDec 3, 2023\n\n\nHarlow Malloc\n\n\n\n\n\n\n  \n\n\n\n\nWelcome To My Blog\n\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\n\n\nNov 30, 2023\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
+    "text": "If you’re reading this, you have just begun your pocket-sized journey into machine learning topics. As with any field, you must start at the basics, and that is where you are now. Unfortunately, in this case, the basics aren’t so basic.\nFor most people (myself included), probability is one of the hardest concepts to grasp out of all of the mathematical disciplines. Most of the ideas are algebraically and computationally simple, but can be a conceptual nightmare. My only goal for this post is to form a basic layer of understanding with which you can use as a foundation for all of your future endeavours in machine learning.\nWe will start with basic probability.\n\n\nBasic Probability\nWe’ll start with some terminology.\n\nThe set of all possible outcomes is called the sample space, and is usually given the symbol \\(S\\).\nThe probability of a event, \\(A\\), occurring can be calculated by taking the ratio of the cardinalities of the event and the sample space, \\(P(A) = \\frac{\\left| A \\right|}{\\left| S \\right|}\\).\n\nThere were a lot of big words in there, so let’s take a look at an example. Imagine rolling a fair six-sided die. There are six equally likely possible outcomes: 1, 2, 3, 4, 5, 6. Therefore, since there are no other possible outcomes, then we have our sample space:\n\\[S = \\{ 1, 2, 3, 4, 5, 6 \\}\\]\nNow, let’s describe an “event”. We will call \\(A\\) the event where we roll an even number. Then we can write:\n\\[A = \\{ 2, 4, 6 \\}\\]\nNow look at the third rule again. The symbols and big words may look complicated, but “taking the ratio of the cardinalities of the event and the sample space” really just means counting up the number of elements in our event and dividing it by the total number of possible elements. In our case, there are three possible even numbers, and six possible total numbers, so:\n\\[P(A) = \\frac{\\left| A \\right|}{\\left| S \\right|} = \\frac{3}{6} = \\frac{1}{2} = 0.5 = 50\\%\\]\nThis should be making sense so far. There are a few other things we can deduce from this simple equation too. Let’s calculate the probability of the sample space:\n\\[P(S) = \\frac{\\left| S \\right|}{\\left| S \\right|} = \\frac{6}{6} = 1 = 100\\%\\]\nThis should also make sense. The probability of any of the possible values occurring should be guaranteed. What about a set with nothing in it? We’ll call that set \\(B\\):\n\\[B = \\{\\}\\]\nThen the probability of \\(B\\) occuring is:\n\\[P(B) = \\frac{\\left| B \\right|}{\\left| S \\right|} = \\frac{0}{6} = 0\\]\nWhich also makes sense. This gives us insight into the range of values that a probability should be able to take:\n\\[0 \\leq P(A) \\leq 1\\]\nThis goes for all scenarios; not just for the die example.\n\n\n\nProbability of This and That\nLet’s extend our example by imagining that we roll two dice, one by one. The first roll can take on any one of six values, and the second one can take on six different values for each of the six values that the first roll could have taken. This gives us \\(6 \\times 6 = 36\\) different possible outcomes. Let’s write our sample space like this:\n\\[S = \\{ (1, 1), (1, 2), (1, 3) \\ldots (6, 5), (6, 6) \\}\\]\nWhat is the probability of the first roll being a \\(2\\)? Let’s write the set for the event of all combinations of rolls where the first roll is a \\(2\\):\n\\[A = \\{ (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6) \\}\\]\nAnd finally:\n\\[P(A) = \\frac{\\left| A \\right|}{\\left| S \\right|} = \\frac{6}{36} = \\frac{1}{6} \\approx 16.67\\%\\]\nLet’s try another probability. This time we ask ourselves, “what’s the probability that our second roll is \\(5\\)”? Well, this set is very similar to the previous one:\n\\[B = \\{ (1, 5), (2, 5), (3, 5), (4, 5), (5, 5), (6, 5) \\}\\]\nAnd the probability is identical:\n\\[P(B) = \\frac{\\left| B \\right|}{\\left| S \\right|} = \\frac{6}{36} = \\frac{1}{6} \\approx 16.67\\%\\]\nLast example! What’s the probability that the first roll is \\(2\\), and that our second roll is \\(5\\)? Well, this set is pretty simple:\n\\[C = \\{ (2, 5) \\}\\]\nSo our probability is:\n\\[P(C) = \\frac{\\left| B \\right|}{\\left| S \\right|} = \\frac{1}{36} \\approx 2.78\\%\\]\nThis is correct, but we have a more powerful technique up our sleeve. In order to find it, let’s look at a visual representation of our example:\n\n\n\n\n\nThe red circle on the left represents all outcomes in the \\(A\\) event, and the green circle on the right represents all outcomes in the \\(B\\) event. Notice that the intersection of these two regions shows the outcome for event \\(C\\).\nThere are two main operations when it comes to sets that are very useful for determining more advanced probabilities.\n\nUnion\nIntersection\n\nThe union, given the symbol \\(\\cup\\), is defined as the set of all events that both \\(A\\) and \\(B\\) contain. In the case of our picture, this is what the union looks like:\n\n\n\n\n\nConversely, the intersection, given the symbol \\(\\cap\\), gives the set of outcomes that \\(A\\) and \\(B\\) share. Here is the diagram:\n\n\n\n\n\nYou can think of it this way:\n\n\\(A \\cup B = A~\\mathrm{or}~B\\)\n\\(A \\cap B = A~\\mathrm{and}~B\\)\n\nBut why is this useful? Well, there’s a really cool relationship that we can derive between the two of them just using the information so far. Here’s how we do it.\nImagine taking the individual probabilities of \\(A\\) and \\(B\\) and adding them together. In doing this, you’d have calculated the probability of the union of the two events, plus a little extra. This little extra comes from the fact that both sets contain their intersection, so you counted the intersection twice on accident. The first copy contributed to the union of the two sets, the second copy is the “little extra”. In other words:\n\\[P(A) + P(B) = P(A \\cup B) + P(A \\cap B)\\]\nWe can rearrange this equation to get our desired result:\n\\[P(A \\cap B) = P(A) + P(B) - P(A \\cup B)\\]\nLet’s use this equation to recalculate the probability of \\(C\\) again. That is, let’s calculate the probability that the first roll is \\(2\\) and that the second roll is \\(5\\).\nFirst, we need to find \\(A \\cup B\\). Remember, this is the same as asking for all outcomes where the first number is \\(2\\) or that the second number is \\(5\\). We can take all of the individual elements from \\(A\\) and be \\(B\\) independently (making sure not to double count any) and place them together:\n\\[A \\cup B = \\{ (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (1, 5), (3, 5), (4, 5), (5, 5), (6, 5) \\}\\]\nNotice that \\((2, 5)\\) appears in both sets, but we only count it once.\nLet’s get this probability:\n\\[P(A \\cup B) = \\frac{\\left| A \\cup B \\right|}{\\left| S \\right|} = \\frac{11}{36} \\approx 30.56\\%\\]\nNow we can get to calculating!\n\\[\\begin{equation}\n\\begin{split}\nP(C) = P(A \\cap B) &= P(A) + P(B) - P(A \\cup B)\\\\\n&= \\frac{1}{6} + \\frac{1}{6} - \\frac{11}{36}\\\\\n&= \\frac{1}{36} \\approx 2.78\\%\n\\end{split}\n\\end{equation}\\]\nExactly the same as last time!\nThis process may seem far more cumbersome than the original calculation, but as the sets of events start increasing in size, it is much easier to know how to calculate probabilities of intersections of events from other probabilities as opposed to actually counting it out.\n\n\n\nConditional Probability\n\n\nCode\nallRolls = []\n\ncurrRoll = [1, 1, 1, 1, 1]\nfor a in range(1, 7):\n    currRoll[0] = a\n    for b in range(1, 7):\n        currRoll[1] = b\n        for c in range(1, 7):\n            currRoll[2] = c\n            for d in range(1, 7):\n                currRoll[3] = d\n                for e in range(1, 7):\n                    currRoll[4] = e\n                    allRolls.append(currRoll.copy())\n                    \nallRollSums = [sum(roll) for roll in allRolls]\n\nsumValues = list(range(5, 31))\nsumCounts = [allRollSums.count(value) for value in sumValues]\n\nplt.plot(sumValues, sumCounts)\nplt.grid()\nplt.show()\n\nnormalizedSumCounts = [count / sum(sumCounts) for count in sumCounts]\nplt.plot(sumValues, normalizedSumCounts)\nplt.grid()\nplt.show()\n\n\n\n\n\n\n\n\nLet’s extend our example by imagining that we roll the same die five times. The die is still fair, and takes on one of six values every roll. We will then track the total sum of all the rolls. For example, if the values that appeared during the rolls were \\(1, 4, 3, 6, 2\\), the total would be \\(1 + 4 + 3 + 6 + 2 = 16\\). We know that the lowest number of"
+  },
+  {
+    "objectID": "posts/Clustering/index.html",
+    "href": "posts/Clustering/index.html",
+    "title": "Clustering",
+    "section": "",
+    "text": "Welcome to my fourth blog post!"
+  },
+  {
+    "objectID": "posts/Anomalies/index.html",
+    "href": "posts/Anomalies/index.html",
+    "title": "Anomaly Detection",
+    "section": "",
+    "text": "Welcome to my fifth blog post!"
   },
   {
     "objectID": "about.html",
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "About this blog"
+    "text": "Hi! My name is Samuel Huber. I am a graduate student attending Virginia Tech for my Master’s degree in Computer Science with a specificied track toward machine learning and artificial intelligence. I graduated summa cum laude with a Bachelor’s degree in Aerospace Engineering and I am interested in all things science and technology related.\nAs of now, this blog will contain five posts about different machine learning topics. These posts should be read in order, top to bottom, and are written as a sort of pocket-sized “learning journey” for introducing new topics to interested individuals (such as yourself). Hopefully these posts will aid in your understanding of machine learning, or at least pique your interest."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Samuel Huber’s Blog",
+    "section": "",
+    "text": "Probability Theory and Random Variables\n\n\n\n\n\nThings are about to get Bayesian…\n\n\n\n\n\n\nDec 3, 2023\n\n\nSamuel Huber\n\n\n\n\n\n\n  \n\n\n\n\nLinear and Nonlinear Regression\n\n\n\n\n\nRegressive: An insurance company you can’t rely on.\n\n\n\n\n\n\nDec 3, 2023\n\n\nSamuel Huber\n\n\n\n\n\n\n  \n\n\n\n\nClassification\n\n\n\n\n\nThe information in this post is classified.\n\n\n\n\n\n\nDec 3, 2023\n\n\nSamuel Huber\n\n\n\n\n\n\n  \n\n\n\n\nClustering\n\n\n\n\n\nYou might get a headache…\n\n\n\n\n\n\nDec 3, 2023\n\n\nSamuel Huber\n\n\n\n\n\n\n  \n\n\n\n\nAnomaly Detection\n\n\n\n\n\nWhat’s an ‘omaly’, and why are we detecting it?\n\n\n\n\n\n\nDec 3, 2023\n\n\nSamuel Huber\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/Classification/index.html",
+    "href": "posts/Classification/index.html",
+    "title": "Classification",
+    "section": "",
+    "text": "Welcome to my third blog post!"
   },
   {
     "objectID": "posts/post-with-code/index.html",
@@ -26,5 +54,12 @@
     "title": "Post With Code",
     "section": "",
     "text": "This is a post with executable code."
+  },
+  {
+    "objectID": "posts/Regression/index.html",
+    "href": "posts/Regression/index.html",
+    "title": "Linear and Nonlinear Regression",
+    "section": "",
+    "text": "Welcome to my second blog post!"
   }
 ]

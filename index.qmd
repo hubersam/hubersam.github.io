@@ -1,8 +1,13 @@
 ---
-title: "Blog"
+title: "Samuel Huber's Blog"
 listing:
-  contents: posts
-  sort: "date desc"
+  contents:
+    - "posts/Probability/index.ipynb"
+    - "posts/Regression/index.ipynb"
+    - "posts/Classification/index.ipynb"
+    - "posts/Clustering/index.ipynb"
+    - "posts/Anomalies/index.ipynb"
+  sort: false
   type: default
   categories: true
   sort-ui: false
