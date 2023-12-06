@@ -23,6 +23,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -62,7 +96,12 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -165,9 +204,637 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<p>Welcome to my second blog post!</p>
+<p>If you’re reading this, you should have already finished the first blog post. Now, with Bayes’ Rule in your toolbox, you are ready to tackle a different set of problems.</p>
+<p>This post will focus much more on actual data and machine learning concepts. Let’s get started!</p>
+<hr>
+<section id="the-dataset" class="level1">
+<h1>The Dataset</h1>
+<p>This time we’ll <em>start</em> by introducing the dataset. This dataset contains information about different cars, such as their miles-per-gallon, number of cylinders, weight, and so on. It was downloaded from <a href="https://www.kaggle.com/datasets/uciml/autompg-dataset">Kaggle</a> and is simple enough to let us glide through the following concepts with ease. Let’s take a look:</p>
+<div class="cell" data-tags="[]" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">'auto-mpg.csv'</span>, encoding<span class="op">=</span><span class="st">'windows-1252'</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div>
 
 
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mpg</th>
+<th data-quarto-table-cell-role="th">cylinders</th>
+<th data-quarto-table-cell-role="th">displacement</th>
+<th data-quarto-table-cell-role="th">horsepower</th>
+<th data-quarto-table-cell-role="th">weight</th>
+<th data-quarto-table-cell-role="th">acceleration</th>
+<th data-quarto-table-cell-role="th">model year</th>
+<th data-quarto-table-cell-role="th">origin</th>
+<th data-quarto-table-cell-role="th">car name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>18.0</td>
+<td>8</td>
+<td>307.0</td>
+<td>130</td>
+<td>3504</td>
+<td>12.0</td>
+<td>70</td>
+<td>1</td>
+<td>chevrolet chevelle malibu</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>15.0</td>
+<td>8</td>
+<td>350.0</td>
+<td>165</td>
+<td>3693</td>
+<td>11.5</td>
+<td>70</td>
+<td>1</td>
+<td>buick skylark 320</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>18.0</td>
+<td>8</td>
+<td>318.0</td>
+<td>150</td>
+<td>3436</td>
+<td>11.0</td>
+<td>70</td>
+<td>1</td>
+<td>plymouth satellite</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>16.0</td>
+<td>8</td>
+<td>304.0</td>
+<td>150</td>
+<td>3433</td>
+<td>12.0</td>
+<td>70</td>
+<td>1</td>
+<td>amc rebel sst</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>17.0</td>
+<td>8</td>
+<td>302.0</td>
+<td>140</td>
+<td>3449</td>
+<td>10.5</td>
+<td>70</td>
+<td>1</td>
+<td>ford torino</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell" data-tags="[]" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 398 entries, 0 to 397
+Data columns (total 9 columns):
+ #   Column        Non-Null Count  Dtype  
+---  ------        --------------  -----  
+ 0   mpg           398 non-null    float64
+ 1   cylinders     398 non-null    int64  
+ 2   displacement  398 non-null    float64
+ 3   horsepower    397 non-null    object 
+ 4   weight        398 non-null    int64  
+ 5   acceleration  398 non-null    float64
+ 6   model year    398 non-null    int64  
+ 7   origin        398 non-null    int64  
+ 8   car name      398 non-null    object 
+dtypes: float64(3), int64(4), object(2)
+memory usage: 28.1+ KB</code></pre>
+</div>
+</div>
+<div class="cell" data-tags="[]" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mpg</th>
+<th data-quarto-table-cell-role="th">cylinders</th>
+<th data-quarto-table-cell-role="th">displacement</th>
+<th data-quarto-table-cell-role="th">weight</th>
+<th data-quarto-table-cell-role="th">acceleration</th>
+<th data-quarto-table-cell-role="th">model year</th>
+<th data-quarto-table-cell-role="th">origin</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>398.000000</td>
+<td>398.000000</td>
+<td>398.000000</td>
+<td>398.000000</td>
+<td>398.000000</td>
+<td>398.000000</td>
+<td>398.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">mean</td>
+<td>23.514573</td>
+<td>5.454774</td>
+<td>193.425879</td>
+<td>2970.424623</td>
+<td>15.568090</td>
+<td>76.010050</td>
+<td>1.572864</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">std</td>
+<td>7.815984</td>
+<td>1.701004</td>
+<td>104.269838</td>
+<td>846.841774</td>
+<td>2.757689</td>
+<td>3.697627</td>
+<td>0.802055</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">min</td>
+<td>9.000000</td>
+<td>3.000000</td>
+<td>68.000000</td>
+<td>1613.000000</td>
+<td>8.000000</td>
+<td>70.000000</td>
+<td>1.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">25%</td>
+<td>17.500000</td>
+<td>4.000000</td>
+<td>104.250000</td>
+<td>2223.750000</td>
+<td>13.825000</td>
+<td>73.000000</td>
+<td>1.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">50%</td>
+<td>23.000000</td>
+<td>4.000000</td>
+<td>148.500000</td>
+<td>2803.500000</td>
+<td>15.500000</td>
+<td>76.000000</td>
+<td>1.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">75%</td>
+<td>29.000000</td>
+<td>8.000000</td>
+<td>262.000000</td>
+<td>3608.000000</td>
+<td>17.175000</td>
+<td>79.000000</td>
+<td>2.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">max</td>
+<td>46.600000</td>
+<td>8.000000</td>
+<td>455.000000</td>
+<td>5140.000000</td>
+<td>24.800000</td>
+<td>82.000000</td>
+<td>3.000000</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>That covers the basic information again, but this time we’ll do something even cooler. Let’s display a histogram of each of the parameters:</p>
+<div class="cell" data-tags="[]" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.hist(bins<span class="op">=</span><span class="dv">50</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">8</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This histogram shows the different values for each feature that every data point has. For example, we can see that a large portion of the cars have between <span class="math inline">\(15\)</span> to <span class="math inline">\(40\)</span> miles-per-gallon. This is cool and all, but for this blog post, we’re going to be more concerned with relationships between features. Let’s try something new:</p>
+<div class="cell" data-tags="[]" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pandas.plotting <span class="im">import</span> scatter_matrix</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>attributes <span class="op">=</span> [<span class="st">"mpg"</span>, <span class="st">"displacement"</span>, <span class="st">"weight"</span>, <span class="st">"acceleration"</span>]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>scatter_matrix(df[attributes], figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">8</span>))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-7-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now <em>this</em> is cool, right? Each plot corresponds to a relationship between two features. For example, the bottom-left plot shows how miles-per-gallon might affect acceleration. From looking at that graph, we can see that there’s not much of a relationship. It’s somewhat of a big mess. But now look up and to the right one plot to see the relationship between weight and displacement. There’s clearly a strong relationship, and we are going to attempt to find it.</p>
+<p>Looking at the main diagonal, the plots look completely different. This is because they have the same <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> axes, so their plots really wouldn’t give us any important information. Therefore, the <code>pandas</code> library knows to replace these plots with histograms, although we’ve already seen them from the previous figure.</p>
+<p>Let’s now shift our focus to the graph of weight and displacement:</p>
+<div class="cell" data-tags="[]" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>scatter <span class="op">=</span> df.plot.scatter(x<span class="op">=</span><span class="st">'displacement'</span>, y<span class="op">=</span><span class="st">'weight'</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-8-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>At this point, we’d like to find some sort of way to model this data. Before we do this, however, we need to look at some math.</p>
+<hr>
+</section>
+<section id="linear-regression" class="level1">
+<h1>Linear Regression</h1>
+<p>Relationships between two variables occur very frequently. For simplicity sake, we will assume that there is one independent variable (<span class="math inline">\(x\)</span>) that affects the output variable (<span class="math inline">\(y\)</span>), therefore called the <em>dependent</em> variable. Mathematically, we write:</p>
+<p><span class="math display">\[y = f(x),\]</span></p>
+<p>where <span class="math inline">\(f\)</span> is a function that changes the input in some way to produce the output.</p>
+<p>We can also use subscripts to represent having more than one input affecting the output, like so:</p>
+<p><span class="math display">\[y = f(x_0, x_1, x_2, \ldots)\]</span></p>
+<p>Even with a large amount of total variables, determining the relationship between independent variables and dependent variables is as simple as finding <span class="math inline">\(f\)</span>. Or so you would think.</p>
+<p>When it comes to real-world relationships, there are very few cases where things are this simple. For example, think about a company that is using commercials to try to increase sales of their product. It would be very nice if doubling the amount of advertisement playing at any given time on television caused twice as many purchases, but that is simply not what happens. A small increase in ads may lead to a similar, deterministic increase in sales, but at a certain point people might get fed up with the ads and stop purchasing the product entirely.</p>
+<p>This observation is even more exaggerated at the individual level. If you assume that all humans behave the same way, then you could easily reason that a change in the output variable will be consistent across all people, but this is also not true. Human beings are individuals, with their own thoughts and opinions and irrationality. At some point, someone may stop purchasing your product just because they don’t feel like it anymore.</p>
+<p>To remedy this, we assume that there is still a function that can describe the relationship between our variables, but we also add on an error term:</p>
+<p><span class="math display">\[Y = f(X) + \epsilon\]</span></p>
+<p>This error term accounts for the other variables that are too complex to account for. It is true that if we knew every single variable, then we wouldn’t need the error term. But alas, this is the way things are.</p>
+<p>In creating our model, we will try to find an approximate function that will give an approximate output for some input. In theory, this model will have reduced the error as much as possible:</p>
+<p><span class="math display">\[\hat{Y} = \hat{f}(X)\]</span></p>
+<p><em>The little “hats” on top indicate that these are approximations.</em></p>
+<p>To create our model, we need to <strong><em>train</em></strong> it on the available data, usually called the <strong><em>training set</em></strong>. If we could train forever, we would remove all of the error within our model, known as the <strong><em>reducible error</em></strong>. If our approximate function correctly represents the actual relationship between data, then we can come very close to this. However, since each data point is affected by variables that we can’t keep track of, there is some <strong><em>irreducible error</em></strong> that will <em>always</em> exist.</p>
+<p>So, we have some understanding of the theory, but how do we do it in practice? There are quite a few methods, but the simplest is <strong><em>Linear Regression</em></strong>. Linear Regression essentially makes the assumption that the input(s) has a linear contribution to the output. In other words, doubling the input doubles the output, halving the input halves the output, and so on. A line has a very simple equation:</p>
+<p><span class="math display">\[y = mx + b,\]</span></p>
+<p>where <span class="math inline">\(m\)</span> is the <strong><em>slope</em></strong>, which signifies the increase or decrease in output for a change in input, and <strong><em>b</em></strong> represents how vertically shifted the values are from the start. Let’s write it in a more appropriate form:</p>
+<p><span class="math display">\[\hat{Y} = \hat{\beta}_1X + \hat{\beta}_0\]</span></p>
+<p>I’ve changed the <span class="math inline">\(m\)</span> and <span class="math inline">\(b\)</span> constants and used subscripts, but the idea is the same. We can also extend this idea to multiple independent variables:</p>
+<p><span class="math display">\[\hat{Y} = \hat{\beta}_0 + \sum_{i = 1}^N \hat{\beta}_iX_i\]</span></p>
+<p>The hats on these constants also indicate that they are approximations of the true constants (if the data actually has a linear relationship).</p>
+<p>So the next question is, how do we find the constants? This is where things begin to get a little complicated.</p>
+<p>Computers do this by minimizing some value that corresponds to the error of our model. There are a few good choices, but the most common is known as the <strong><em>Mean Squared Error</em></strong> (MSE):</p>
+<p><span class="math display">\[\mathrm{MSE} = \frac{1}{N}\sum_{i = 1}^N (Y_i - \hat{f}(X_i))^2\]</span></p>
+<p>The inside of the parantheses show the difference between the actual measured output value of the data and the currne iteration our model’s output value for the same input. This difference is then squared. After getting this squared difference for every data point, they’re all summed up, and divided by the total number of data points.</p>
+<p>For simple Linear Regression (one input variable), formulas for these constants can be found directly. First, we plug in the linear equation for <span class="math inline">\(\hat{f}(X)\)</span>:</p>
+<p><span class="math display">\[\begin{equation}
+\begin{split}
+\frac{1}{N}\sum_{i = 1}^N (Y_i - \hat{f}(X_i))^2 &amp;= \frac{1}{N}\sum_{i = 1}^N (Y_i - \hat{\beta}_1X_i - \hat{\beta}_0)^2\\
+&amp;= \frac{1}{N}\sum_{i = 1}^N (Y_i^2 - 2\hat{\beta}_1X_iY_i - 2\hat{\beta}_0Y_i + \hat{\beta}_1^2X_i^2 + 2\hat{\beta}_0\hat{\beta}_1X_i + \hat{\beta}_0^2)
+\end{split}
+\end{equation}\]</span></p>
+<p>Pretty nasty. Now, we’d like to minimize this to find the coefficient values. Let’s imagine that the error for each coefficient looks something like this:</p>
+<div class="cell" data-tags="[]" data-execution_count="201">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-9-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Our error shouldn’t have a maximum, since our line could always be worse, but it should definitely have a minimum, so we know that this graph is somewhat representative of how the error will change as we change the coefficients. To mimimize this error, we need to find the coefficient values that will bring the error down into the very bottom of the valley. We can do this by taking the partial derivative with respect to the coefficient values. This is because the derivative represents the rate of change of a function with respect to a changing independent variable. If we find this derivative, and set it equal to zero, we should have reached an inflection point on the graph, since the derivative must switch between negative and positive values to flip the direction of the function.</p>
+<p>Here is a visual representation of the derivative of this curve:</p>
+<div class="cell" data-tags="[]" data-execution_count="204">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-10-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Notice how the line that represents the derivative of the curve passes through <span class="math inline">\(y = 0\)</span> right at <span class="math inline">\(x = 3\)</span>, the exact same spot where the parabolic curve flips directions. Therefore, to minimize the error, we can take the derivative of our error with respect to each of the variables, set them equal to zero, and solve for the coefficients.</p>
+<p>We’ll start with the easier one (<span class="math inline">\(\hat{\beta}_0\)</span>) first:</p>
+<p><span class="math display">\[\frac{\partial}{\partial \hat{\beta}_0}\mathrm{MSE} = \frac{1}{N}\sum_{i = 1}^N (-2Y_i + 2\hat{\beta}_1X_i + 2\hat{\beta}_0)\]</span></p>
+<p>Now that we have the partial derivative, we can set it equal to zero to find the minimum:</p>
+<p><span class="math display">\[\newcommand{\olsi}[1]{\,\overline{\!{#1}}}\]</span></p>
+<p><span class="math display">\[\begin{equation}
+\begin{split}
+\frac{1}{N}\sum_{i = 1}^N (-2Y_i + 2\hat{\beta}_1X_i + 2\hat{\beta}_0) &amp;= 0\\
+-\frac{2}{N}\sum_{i = 1}^NY_i + \frac{2\hat{\beta}_1}{N}\sum_{i = 1}^NX_i + \frac{2\hat{\beta}_0}{N}\sum_{i = 1}^N 1 &amp;= 0\\
+-\olsi{Y} + \hat{\beta}_1\olsi{X} + \hat{\beta}_0 &amp;= 0
+\end{split}
+\end{equation}\]</span></p>
+<p>Rearranging:</p>
+<p><span class="math display">\[\hat{\beta}_0 = \olsi{Y} - \hat{\beta}_1\olsi{X},\]</span></p>
+<p>where <span class="math inline">\(\olsi{X}\)</span> and <span class="math inline">\(\olsi{Y}\)</span> are the averages of <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, respectively.</p>
+<p>Now, let’s do the same thing for <span class="math inline">\(\hat{\beta}_1\)</span>. Taking the partial derivative:</p>
+<p><span class="math display">\[\frac{\partial}{\partial \hat{\beta}_1}\mathrm{MSE} = \frac{1}{N}\sum_{i = 1}^N (-2X_iY_i + 2\hat{\beta}_1X_i^2 + 2\hat{\beta}_0X_i)\]</span></p>
+<p>And setting it equal to zero:</p>
+<p><span class="math display">\[\begin{equation}
+\begin{split}
+\frac{1}{N}\sum_{i = 1}^N (-2X_iY_i + 2\hat{\beta}_1X_i^2 + 2\hat{\beta}_0X_i) &amp;= 0\\
+-\frac{2}{N}\sum_{i = 1}^N X_iY_i + \frac{2\hat{\beta}_1}{N}\sum_{i = 1}^NX_i^2 + \frac{2\hat{\beta}_0}{N}\sum_{i = 1}^NX_i &amp;= 0\\
+\end{split}
+\end{equation}\]</span></p>
+<p>Substituting our new equation in for <span class="math inline">\(\hat{\beta}_1\)</span>:</p>
+<p><span class="math display">\[\begin{equation}
+\begin{split}
+-\frac{2}{N}\sum_{i = 1}^N X_iY_i + \frac{2\hat{\beta}_1}{N}\sum_{i = 1}^NX_i^2 + \frac{2}{N}(\olsi{Y} - \hat{\beta}_1\olsi{X})\sum_{i = 1}^NX_i &amp;= 0\\
+-\frac{2}{N}\sum_{i = 1}^N X_iY_i + \frac{2\hat{\beta}_1}{N}\sum_{i = 1}^NX_i^2 + \frac{2}{N}\sum_{i = 1}^NX_i\olsi{Y} - \frac{2\hat{\beta}_1}{N}\sum_{i = 1}^NX_i\olsi{X} &amp;= 0\\
+\frac{2}{N}\left(\sum_{i = 1}^NX_i\olsi{Y} - \sum_{i = 1}^N X_iY_i\right) + \frac{2\hat{\beta}_1}{N}\left(\sum_{i = 1}^NX_i^2 - \sum_{i = 1}^NX_i\olsi{X}\right) &amp;= 0\\
+\sum_{i = 1}^N(X_i\olsi{Y} - X_iY_i) + \hat{\beta}_1\sum_{i = 1}^N(X_i^2 - X_i\olsi{X}) &amp;= 0\\
+-\sum_{i = 1}^NX_i(Y_i - \olsi{Y}) + \hat{\beta}_1\sum_{i = 1}^NX_i(X_i - \olsi{X}) &amp;= 0
+\end{split}
+\end{equation}\]</span></p>
+<p>Rearranging:</p>
+<p><span class="math display">\[\begin{equation}
+\begin{split}
+\hat{\beta}_1 &amp;= \frac{\sum\limits_{i = 1}^NX_i(Y_i - \olsi{Y})}{\sum\limits_{i = 1}^NX_i(X_i - \olsi{X})}
+\end{split}
+\end{equation}\]</span></p>
+<p>At this point, we have an equation for <span class="math inline">\(\hat{\beta}_1\)</span>, but this may not be the form you’ve seen it in before. In order to get to that form, we need to do a unique manipulation. First, we need to note the following relationship:</p>
+<p><span class="math display">\[\begin{equation}
+\begin{split}
+\sum\limits_{i = 1}^N (X_i - \olsi{X}) &amp;= \left( X_0 -  \frac{X_0 + X_1 + \ldots}{N} \right) + \left( X_1 -  \frac{X_0 + X_1 + \ldots}{N} \right) + \ldots\\
+&amp;= \left( X_0 + X_1 + \ldots \right) - N\left( \frac{X_0 + X_1 + \ldots}{N} \right) = 0
+\end{split}
+\end{equation}\]</span></p>
+<p>The same exact process can be applied with <span class="math inline">\(Y\)</span> and <span class="math inline">\(\olsi{Y}\)</span>. So, our two new equations are:</p>
+<p><span class="math display">\[\begin{equation}
+\begin{split}
+\sum\limits_{i = 1}^N (X_i - \olsi{X}) &amp;= 0\\
+\sum\limits_{i = 1}^N (Y_i - \olsi{Y}) &amp;= 0
+\end{split}
+\end{equation}\]</span></p>
+<p>Since the left side is equal to zero, we can multiply it by whatever constant we’d like and the relationship would still be maintained. We will multiply both equations by <span class="math inline">\(\olsi{X}\)</span>:</p>
+<p><span class="math display">\[\begin{equation}
+\begin{split}
+\olsi{X}\sum\limits_{i = 1}^N (X_i - \olsi{X}) &amp;= \sum\limits_{i = 1}^N \olsi{X}(X_i - \olsi{X}) = 0\\
+\olsi{X}\sum\limits_{i = 1}^N (Y_i - \olsi{Y}) &amp;= \sum\limits_{i = 1}^N \olsi{X}(Y_i - \olsi{Y}) = 0
+\end{split}
+\end{equation}\]</span></p>
+<p>These equations will be used to perform some algebraic wizardry. Since both of these equations are equal to zero, we can subtract them from the numerator and denominator of our equation for <span class="math inline">\(\hat{\beta}_1\)</span> without changing anything:</p>
+<p><span class="math display">\[\begin{equation}
+\begin{split}
+\hat{\beta}_1 = \frac{\sum\limits_{i = 1}^NX_i(Y_i - \olsi{Y})}{\sum\limits_{i = 1}^NX_i(X_i - \olsi{X})} &amp;= \frac{\sum\limits_{i = 1}^NX_i(Y_i - \olsi{Y}) - \sum\limits_{i = 1}^N \olsi{X}(Y_i - \olsi{Y})}{\sum\limits_{i = 1}^NX_i(X_i - \olsi{X}) - \sum\limits_{i = 1}^N \olsi{X}(X_i - \olsi{X})}\\
+&amp;= \frac{\sum\limits_{i = 1}^N\left[X_i(Y_i - \olsi{Y}) - \olsi{X}(Y_i - \olsi{Y})\right]}{\sum\limits_{i = 1}^N\left[X_i(X_i - \olsi{X}) - \olsi{X}(X_i - \olsi{X})\right]}\\
+&amp;= \frac{\sum\limits_{i = 1}^N\left[(X_i - \olsi{X})(Y_i - \olsi{Y})\right]}{\sum\limits_{i = 1}^N\left[(X_i - \olsi{X})(X_i - \olsi{X})\right]}\\
+&amp;= \frac{\sum\limits_{i = 1}^N(X_i - \olsi{X})(Y_i - \olsi{Y})}{\sum\limits_{i = 1}^N(X_i - \olsi{X})^2}
+\end{split}
+\end{equation}\]</span></p>
+<p>Finally! We got a (somewhat) simple looking equation for our second coefficient. There is another representation, but it is more complicated and doesn’t provide many benefits over this one.</p>
+<p>Let’s recap:</p>
+<p><span class="math display">\[\hat{\beta}_0 = \olsi{Y} - \hat{\beta}_1\olsi{X},\]</span></p>
+<p><span class="math display">\[\hat{\beta}_1 = \frac{\sum\limits_{i = 1}^N(X_i - \olsi{X})(Y_i - \olsi{Y})}{\sum\limits_{i = 1}^N(X_i - \olsi{X})^2},\]</span></p>
+<p>where</p>
+<p><span class="math display">\[\olsi{X} = \frac{1}{N}\sum\limits_{i = 1}^N X_i\]</span></p>
+<p><span class="math display">\[\mathrm{and}\]</span></p>
+<p><span class="math display">\[\olsi{Y} = \frac{1}{N}\sum\limits_{i = 1}^N Y_i\]</span></p>
+<p>Now that we have our equations, let’s try applying them.</p>
+<div class="cell" data-tags="[]" data-execution_count="118">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> np.random.rand(m, <span class="dv">1</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> <span class="dv">4</span> <span class="op">+</span> <span class="dv">3</span> <span class="op">*</span> X <span class="op">+</span> np.random.randn(m, <span class="dv">1</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> [element[<span class="dv">0</span>] <span class="cf">for</span> element <span class="kw">in</span> X]</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> [element[<span class="dv">0</span>] <span class="cf">for</span> element <span class="kw">in</span> Y]</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>plt.plot(X, Y, <span class="st">"b."</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"$X$"</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"$Y$"</span>, rotation<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>plt.axis([<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">15</span>])</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>plt.grid()</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-11-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This is fake data that was generated with the sole purpose of using our new equations to fit a line to it. Let’s try it out!</p>
+<div class="cell" data-tags="[]" data-execution_count="119">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>productSum <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>squareSum <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>X_Mean <span class="op">=</span> <span class="bu">sum</span>(X) <span class="op">/</span> N</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>Y_Mean <span class="op">=</span> <span class="bu">sum</span>(Y) <span class="op">/</span> N</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, N):</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    productSum <span class="op">+=</span> (X[i] <span class="op">-</span> X_Mean) <span class="op">*</span> (Y[i] <span class="op">-</span> Y_Mean)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    squareSum <span class="op">+=</span> (X[i] <span class="op">-</span> X_Mean) <span class="op">*</span> (X[i] <span class="op">-</span> X_Mean)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>b1 <span class="op">=</span> productSum <span class="op">/</span> squareSum</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>b0 <span class="op">=</span> Y_Mean <span class="op">-</span> (b1 <span class="op">*</span> X_Mean)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(b0)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(b1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>4.215096157546749
+2.770113386438484</code></pre>
+</div>
+</div>
+<p>These are close to the coefficients that were used to generate the randomized data in the first place (<span class="math inline">\(4\)</span> and <span class="math inline">\(3\)</span>), so we know we’re on the right track. Let’s plot it to see what the graph looks like:</p>
+<div class="cell" data-tags="[]" data-execution_count="123">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>xAxis <span class="op">=</span> np.asarray(<span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">100</span>))</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>yAxis <span class="op">=</span> (xAxis <span class="op">*</span> b1) <span class="op">+</span> b0</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>plt.plot(X, Y, <span class="st">"b."</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>plt.plot(xAxis, yAxis, <span class="st">"g"</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"$X$"</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"$Y$"</span>, rotation<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>plt.axis([<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">15</span>])</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>plt.grid()</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-13-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Nice! We see that the line described by our coefficients seems to pass as close to all the points as it can.</p>
+<p>You may wonder, “why did we try to minimize the Mean Squared Error?” Why not just the difference between the true value and estimated value? Well, some true values may be above our estimates, and some may be below. A worst-case scenario would occur when this occurs over and over, and all of the positive values cancel with the negative values, giving us no information. The squaring process removes all negatives.</p>
+<p>Your next question may be, “then why not use the absolute value instead of squaring?” And that is a very good point. In fact, this can be done. The reason it typically isn’t is that the Mean Squared Error has some nice properties with certain distributions and have a deeper connection to the data in general. However, the absolute value error is used enough to have its own name: the <strong><em>L-1 Norm</em></strong>. The square root of our Mean Squared Error, (also called the Root Mean Square (RMS)) is called the <strong><em>L-2 Norm</em></strong>. There are technically an infinite amount of other norms, but the L-1 and L-2 norms are the most common ones used in practice.</p>
+<p>The L-1 Norm is preferred when there are a few outliers in the data. This is because the Mean Squared Error exacerbates the error that outliers have, since everything is squared. Let’s take a look at how much this affects our line by adding a couple outliers:</p>
+<div class="cell" data-tags="[]" data-execution_count="121">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>randomIndices <span class="op">=</span> [i <span class="cf">for</span> (i, _) <span class="kw">in</span> <span class="bu">enumerate</span>(X) <span class="cf">if</span> X[i] <span class="op">&gt;</span> <span class="fl">1.9</span>]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>Y[randomIndices[<span class="dv">0</span>]] <span class="op">=</span> <span class="fl">0.5</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>Y[randomIndices[<span class="dv">1</span>]] <span class="op">=</span> <span class="fl">0.25</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>productSum <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>squareSum <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>X_Mean <span class="op">=</span> <span class="bu">sum</span>(X) <span class="op">/</span> N</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>Y_Mean <span class="op">=</span> <span class="bu">sum</span>(Y) <span class="op">/</span> N</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, N):</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    productSum <span class="op">+=</span> (X[i] <span class="op">-</span> X_Mean) <span class="op">*</span> (Y[i] <span class="op">-</span> Y_Mean)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    squareSum <span class="op">+=</span> (X[i] <span class="op">-</span> X_Mean) <span class="op">*</span> (X[i] <span class="op">-</span> X_Mean)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>newB1 <span class="op">=</span> productSum <span class="op">/</span> squareSum</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>newB0 <span class="op">=</span> Y_Mean <span class="op">-</span> (b1 <span class="op">*</span> X_Mean)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>newYAxis <span class="op">=</span> (xAxis <span class="op">*</span> newB1) <span class="op">+</span> newB0</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>plt.plot(X, Y, <span class="st">"b."</span>)</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>plt.plot(xAxis, yAxis, <span class="st">"g"</span>)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>plt.plot(xAxis, newYAxis, <span class="st">"r"</span>)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"$X$"</span>)</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"$Y$"</span>, rotation<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>plt.axis([<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">15</span>])</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>plt.grid()</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>As you can see, it took only <em>two</em> outliers to move our new line (red) a substantial amount. In this case, it might be better to use the L-1 norm.</p>
+<p>Let’s try to fit a line to our dataset this time. We’ll use <code>scikit-learn</code>’s <code>LinearRegression</code> class to do it for us:</p>
+<div class="cell" data-tags="[]" data-execution_count="129">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>disp <span class="op">=</span> np.asarray(df[<span class="st">'displacement'</span>]).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>weight <span class="op">=</span> np.asarray(df[<span class="st">'weight'</span>]).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>lin_reg <span class="op">=</span> LinearRegression()</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>lin_reg.fit(disp, weight)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>lin_reg.intercept_, lin_reg.coef_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="129">
+<pre><code>(array([1505.01873083]), array([[7.57605909]]))</code></pre>
+</div>
+</div>
+<div class="cell" data-tags="[]" data-fign-align="center" data-execution_count="146">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>xAxis <span class="op">=</span> <span class="bu">range</span>(<span class="bu">int</span>(<span class="bu">min</span>(disp)), <span class="bu">int</span>(<span class="bu">max</span>(disp)))</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>yAxis <span class="op">=</span> (xAxis <span class="op">*</span> lin_reg.coef_[<span class="dv">0</span>]) <span class="op">+</span> lin_reg.intercept_[<span class="dv">0</span>]</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>plt.scatter(df[<span class="st">'displacement'</span>], df[<span class="st">'weight'</span>], alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>plt.plot(xAxis, yAxis, <span class="st">"r"</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'displacement'</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'weight'</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-16-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Looks pretty solid! This model can now be used to estimate the weight of a car just by knowing the displacement. Let’s use a specific car as an example and measure how close our prediction was. We will use the Lexus LS 400, which has a <span class="math inline">\(\sim250~\mathrm{in}^3\)</span> displacement and a curb weight of <span class="math inline">\(\sim3700~\mathrm{lbs}\)</span>:</p>
+<div class="cell" data-tags="[]" data-execution_count="149">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>dispTest <span class="op">=</span> <span class="dv">250</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>weightTest <span class="op">=</span> (lin_reg.coef_ <span class="op">*</span> dispTest) <span class="op">+</span> lin_reg.intercept_</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>weightTest[<span class="dv">0</span>][<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="149">
+<pre><code>3399.0335038967237</code></pre>
+</div>
+</div>
+<p>Not too bad! With an error of about <span class="math inline">\(\frac{3700 - 3400}{3700} \approx 8.1\%\)</span>, we’re doing pretty well, especially considering that our dataset doesn’t contain any Lexus cars:</p>
+<p>Of course, the variation of the weight for each displacement is due to other variables affecting the weight. In this case, if you want to determine how multiple variables are affecting the output, you can use Multiple Linear Regression. Since there is a coefficient for each independent variable, finding the formulas directly is incredibly difficult, and only gets harder as more variables are added. Of course, this is why we invented computers; to do our dirty work for us.</p>
+<hr>
+</section>
+<section id="nonlinear-regression" class="level1">
+<h1>Nonlinear Regression</h1>
+<p>Let’s look at another plot from our data:</p>
+<div class="cell" data-tags="[]" data-fign-align="center" data-execution_count="205">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>plt.scatter(df[<span class="st">'mpg'</span>], df[<span class="st">'displacement'</span>], alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'mpg'</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'displacement'</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-18-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We can see that fitting a line to this would be pretty difficult. We might have some accurrate approximations for miles-per-gallon values between <span class="math inline">\(15\)</span> and <span class="math inline">\(25\)</span>, but the data seems to level out after this point. In this case, we need to find a non-linear model. Luckily, <code>scikit-learn</code> has our back:</p>
+<div class="cell" data-tags="[]" data-fign-align="center" data-execution_count="228">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PolynomialFeatures</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>disp <span class="op">=</span> np.asarray(df[<span class="st">'displacement'</span>]).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>mpg <span class="op">=</span> np.asarray(df[<span class="st">'mpg'</span>]).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>poly_features <span class="op">=</span> PolynomialFeatures(degree<span class="op">=</span><span class="dv">2</span>, include_bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>X_poly <span class="op">=</span> poly_features.fit_transform(mpg)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>lin_reg <span class="op">=</span> LinearRegression()</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>lin_reg.fit(X_poly, disp)</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>lin_reg.intercept_, lin_reg.coef_</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>X_new <span class="op">=</span> np.linspace(<span class="dv">10</span>, <span class="dv">45</span>, <span class="dv">100</span>).reshape(<span class="dv">100</span>, <span class="dv">1</span>)</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>X_new_poly <span class="op">=</span> poly_features.transform(X_new)</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>y_new <span class="op">=</span> lin_reg.predict(X_new_poly)</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>plt.plot(mpg, disp, <span class="st">"b."</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>plt.plot(X_new, y_new, <span class="st">"r-"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"$x_1$"</span>)</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"$y$"</span>, rotation<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>plt.grid()</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-19-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Not too bad! We shaped this using a polynomial of degree <span class="math inline">\(2\)</span>, otherwise known as a parabola. Would it become more accurate if we increased the degree value? Let’s try:</p>
+<div class="cell" data-tags="[]" data-fign-align="center" data-execution_count="229">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PolynomialFeatures</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>disp <span class="op">=</span> np.asarray(df[<span class="st">'displacement'</span>]).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>mpg <span class="op">=</span> np.asarray(df[<span class="st">'mpg'</span>]).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>poly_features <span class="op">=</span> PolynomialFeatures(degree<span class="op">=</span><span class="dv">3</span>, include_bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>X_poly <span class="op">=</span> poly_features.fit_transform(mpg)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>lin_reg <span class="op">=</span> LinearRegression()</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>lin_reg.fit(X_poly, disp)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>lin_reg.intercept_, lin_reg.coef_</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>X_new <span class="op">=</span> np.linspace(<span class="dv">10</span>, <span class="dv">45</span>, <span class="dv">100</span>).reshape(<span class="dv">100</span>, <span class="dv">1</span>)</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>X_new_poly <span class="op">=</span> poly_features.transform(X_new)</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>y_new <span class="op">=</span> lin_reg.predict(X_new_poly)</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>plt.plot(mpg, disp, <span class="st">"b."</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>plt.plot(X_new, y_new, <span class="st">"r-"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"$x_1$"</span>)</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"$y$"</span>, rotation<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>plt.grid()</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-20-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Changing the degree to <span class="math inline">\(3\)</span> definitely seems to have lowered the curve at the end, which is nice! But why can’t we just keep increasing the degree? Well, as you increase the flexibility that the model has, you begin to do something called <strong><em>overfitting</em></strong>. In simple terms, your model is trying to match too closely to the data in your training set. This makes your training set error look really low, which appears to be a good thing, but the problem is that any predictions made will be <em>less</em> accurate. Essentially, the model is finding patterns that aren’t really there, and is trying to match them as closely as possible. Another way of saying the same thing is to say that the model has <strong><em>high variance</em></strong>.</p>
+<p><strong><em>Underfitting</em></strong> occurs when the model doesn’t fit the training data particulary well, but generalizes to new data well (only because it’s so simple). You can also say that this model has <strong><em>high bias</em></strong>.</p>
+<p>In machine learning, bias and variance are inescapable. Raising your bias will lower your variance and result in underfitting. Raising your variance will lower your bias and result in overfitting. This is known as the <strong><em>bias-variance tradeoff</em></strong>. The question of finding a good model is the same as asking for a model that minimizes both bias and variance as much as possible.</p>
+
+
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
