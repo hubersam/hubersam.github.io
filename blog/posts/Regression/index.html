@@ -442,7 +442,7 @@ memory usage: 28.1+ KB</code></pre>
 </div>
 </div>
 <p>This histogram shows the different values for each feature that every data point has. For example, we can see that a large portion of the cars have between <span class="math inline">\(15\)</span> to <span class="math inline">\(40\)</span> miles-per-gallon. This is cool and all, but for this blog post, we’re going to be more concerned with relationships between features. Let’s try something new:</p>
-<div class="cell" data-tags="[]" data-execution_count="8">
+<div class="cell" data-tags="[]">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pandas.plotting <span class="im">import</span> scatter_matrix</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>attributes <span class="op">=</span> [<span class="st">"mpg"</span>, <span class="st">"displacement"</span>, <span class="st">"weight"</span>, <span class="st">"acceleration"</span>]</span>
@@ -757,6 +757,7 @@ memory usage: 28.1+ KB</code></pre>
 </div>
 <p>Not too bad! With an error of about <span class="math inline">\(\frac{3700 - 3400}{3700} \approx 8.1\%\)</span>, we’re doing pretty well, especially considering that our dataset doesn’t contain any Lexus cars:</p>
 <p>Of course, the variation of the weight for each displacement is due to other variables affecting the weight. In this case, if you want to determine how multiple variables are affecting the output, you can use Multiple Linear Regression. Since there is a coefficient for each independent variable, finding the formulas directly is incredibly difficult, and only gets harder as more variables are added. Of course, this is why we invented computers; to do our dirty work for us.</p>
+<p><em>This section will be expanded in the future to include Linear Regression using multiple features.</em></p>
 <hr>
 </section>
 <section id="nonlinear-regression" class="level1">
