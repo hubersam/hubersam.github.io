@@ -1,6 +1,6 @@
 ---
 title: "About"
-image: profile.jpg
+image: me.png
 about:
   template: jolla
   links:
@@ -8,7 +8,6 @@ about:
       text: Github
       href: https://github.com/hubersam
 ---
-
 Hi! My name is Samuel Huber. I am a graduate student attending Virginia Tech for my Master's degree in Computer Science with a specificied track toward machine learning and artificial intelligence. I graduated summa cum laude with a Bachelor's degree in Aerospace Engineering and I am interested in all things science and technology related.
 
 As of now, this blog will contain five posts about different machine learning topics. These posts should be read in order, top to bottom, and are written as a sort of pocket-sized "learning journey" for introducing new topics to interested individuals (such as yourself). Hopefully these posts will aid in your understanding of machine learning, or at least pique your interest.
